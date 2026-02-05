@@ -2,213 +2,144 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Valentine Proposal 💖</title>
-
+<title>Valentine 💖</title>
 <style>
     body {
         margin: 0;
-        background: radial-gradient(circle at top, #ffe6f0, #ffb6c1, #ff69b4);
-        font-family: 'Segoe UI', sans-serif;
-        text-align: center;
         height: 100vh;
-        overflow: hidden;
+        background: radial-gradient(circle at top, #ffb6c1, #ff69b4);
         display: flex;
-        justify-content: center;
         align-items: center;
+        justify-content: center;
+        font-family: 'Comic Sans MS', cursive;
+        overflow: hidden;
     }
 
-    .box {
-        background: rgba(255,255,255,0.95);
-        padding: 45px;
-        border-radius: 25px;
-        box-shadow: 0 0 30px rgba(255,105,180,0.6);
-        z-index: 3;
-        animation: glow 3s infinite alternate;
-    }
-
-    @keyframes glow {
-        from { box-shadow: 0 0 20px rgba(255,105,180,0.4); }
-        to { box-shadow: 0 0 40px rgba(255,20,147,0.9); }
+    .card {
+        background: white;
+        padding: 40px 50px;
+        border-radius: 20px;
+        text-align: center;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        z-index: 2;
     }
 
     h1 {
         color: #ff1493;
-        margin-bottom: 15px;
         font-size: 2.2em;
-    }
-
-    p {
-        color: #ff4d88;
-        font-size: 1.1em;
+        margin-bottom: 30px;
     }
 
     button {
-        padding: 15px 45px;
+        padding: 15px 35px;
         font-size: 18px;
         border: none;
-        border-radius: 40px;
+        border-radius: 12px;
         cursor: pointer;
-        margin: 15px;
         transition: 0.3s;
-        font-weight: bold;
+        position: relative;
     }
 
     #yesBtn {
-        background: linear-gradient(to right, #ff1493, #ff69b4);
+        background: #ff1493;
         color: white;
-        box-shadow: 0 0 15px rgba(255,20,147,0.6);
+        margin-right: 20px;
     }
 
     #yesBtn:hover {
         transform: scale(1.1);
-        box-shadow: 0 0 25px rgba(255,20,147,0.9);
     }
 
     #noBtn {
-        background: #555;
-        color: white;
+        background: #ccc;
+        color: black;
         position: absolute;
     }
 
-    #imageBox {
-        display: none;
-        text-align: center;
-        z-index: 3;
-        animation: pop 1s ease;
-    }
-
-    @keyframes pop {
-        0% { transform: scale(0.5); opacity: 0; }
-        100% { transform: scale(1); opacity: 1; }
-    }
-
-    #imageBox img {
-        width: 280px;
-        border-radius: 25px;
-        margin-top: 15px;
-        box-shadow: 0 0 25px rgba(255,105,180,0.7);
-    }
-
-    /* Floating hearts */
-    .heart {
+    canvas {
         position: fixed;
-        bottom: -30px;
-        animation: floatUp 7s linear infinite;
-        opacity: 0.8;
-        z-index: 1;
-        user-select: none;
-    }
-
-    @keyframes floatUp {
-        0% {
-            transform: translateY(0) scale(1);
-            opacity: 0.8;
-        }
-        100% {
-            transform: translateY(-120vh) scale(1.8);
-            opacity: 0;
-        }
-    }
-
-    /* Sparkles */
-    .sparkle {
-        position: fixed;
-        width: 6px;
-        height: 6px;
-        background: white;
-        border-radius: 50%;
-        opacity: 0.8;
-        animation: sparkle 3s infinite ease-in-out;
-        z-index: 1;
-    }
-
-    @keyframes sparkle {
-        0%,100% { opacity: 0.2; }
-        50% { opacity: 1; }
+        top: 0;
+        left: 0;
+        pointer-events: none;
     }
 </style>
 </head>
 
 <body>
 
-<audio id="bgMusic" loop>
-    <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_4c49c8b5c1.mp3?filename=romantic-piano-112191.mp3" type="audio/mpeg">
-</audio>
-
-<div class="box" id="questionBox">
-    <h1>Shabu 💖</h1>
-    <h1>Will you be my Valentine?</h1>
-    <p>Every heartbeat of mine already belongs to you 💞</p>
+<div class="card" id="card">
+    <h1>Shabu, will you be my Valentine? 💖</h1>
     <button id="yesBtn">Yes 💘</button>
-    <button id="noBtn">No 😜</button>
+    <button id="noBtn">No 💔</button>
 </div>
 
-<div class="box" id="imageBox">
-    <h1>You said YES 😍💖</h1>
-    <p>My heart is forever yours 💞✨</p>
-    <p>Happy Valentine’s Day, my love 💐</p>
-    <img src="https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=500&q=80" alt="Happy Happy Man">
-</div>
+<canvas id="fireworks"></canvas>
 
 <script>
-    const noBtn = document.getElementById("noBtn");
-    const yesBtn = document.getElementById("yesBtn");
-    const questionBox = document.getElementById("questionBox");
-    const imageBox = document.getElementById("imageBox");
-    const bgMusic = document.getElementById("bgMusic");
+const noBtn = document.getElementById("noBtn");
+const yesBtn = document.getElementById("yesBtn");
+const canvas = document.getElementById("fireworks");
+const ctx = canvas.getContext("2d");
 
-    // Music autoplay after first click (browser policy safe)
-    document.body.addEventListener("click", () => {
-        bgMusic.play();
-    }, { once: true });
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-    // Floating No button
-    noBtn.addEventListener("mouseover", () => {
-        const x = Math.random() * (window.innerWidth - 150);
-        const y = Math.random() * (window.innerHeight - 150);
-        noBtn.style.left = x + "px";
-        noBtn.style.top = y + "px";
+// Move NO button randomly
+noBtn.style.left = "60%";
+noBtn.style.top = "60%";
+
+noBtn.addEventListener("mouseover", () => {
+    const x = Math.random() * (window.innerWidth - 100);
+    const y = Math.random() * (window.innerHeight - 50);
+    noBtn.style.left = x + "px";
+    noBtn.style.top = y + "px";
+});
+
+// Fireworks
+let particles = [];
+
+function createFirework(x, y) {
+    for (let i = 0; i < 80; i++) {
+        particles.push({
+            x,
+            y,
+            vx: (Math.random() - 0.5) * 8,
+            vy: (Math.random() - 0.5) * 8,
+            life: 100,
+            color: `hsl(${Math.random() * 360}, 100%, 60%)`
+        });
+    }
+}
+
+function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach((p, i) => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life--;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.fill();
+        if (p.life <= 0) particles.splice(i, 1);
     });
+    requestAnimationFrame(animate);
+}
 
-    // Yes button
-    yesBtn.addEventListener("click", () => {
-        questionBox.style.display = "none";
-        imageBox.style.display = "block";
-        launchHearts();
-    });
+animate();
 
-    // Floating hearts
-    function createHeart() {
-        const heart = document.createElement("div");
-        heart.classList.add("heart");
-        heart.innerHTML = ["❤️","💖","💘","💕","💞"][Math.floor(Math.random()*5)];
-        heart.style.left = Math.random() * 100 + "vw";
-        heart.style.fontSize = (Math.random() * 25 + 15) + "px";
-        heart.style.animationDuration = (Math.random() * 4 + 4) + "s";
-        document.body.appendChild(heart);
-        setTimeout(() => heart.remove(), 8000);
+yesBtn.addEventListener("click", () => {
+    document.getElementById("card").innerHTML = 
+        "<h1>YAAAY 💖💖💖<br>Happy Valentine’s Day Shabu! 🌹</h1>";
+    for (let i = 0; i < 6; i++) {
+        setTimeout(() => {
+            createFirework(
+                Math.random() * window.innerWidth,
+                Math.random() * window.innerHeight
+            );
+        }, i * 400);
     }
-
-    setInterval(createHeart, 250);
-
-    // Sparkles
-    function createSparkle() {
-        const sp = document.createElement("div");
-        sp.classList.add("sparkle");
-        sp.style.left = Math.random() * 100 + "vw";
-        sp.style.top = Math.random() * 100 + "vh";
-        document.body.appendChild(sp);
-        setTimeout(() => sp.remove(), 3000);
-    }
-
-    setInterval(createSparkle, 300);
-
-    // Celebration burst
-    function launchHearts() {
-        for(let i=0;i<30;i++){
-            setTimeout(createHeart, i*80);
-        }
-    }
+});
 </script>
 
 </body>
